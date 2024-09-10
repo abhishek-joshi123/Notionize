@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1724959884407,
+      "tag": "0000_kind_quasar",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1725000077664,
+      "tag": "0001_conscious_thena",
+      "breakpoints": true
+    }
+  ]
+}
