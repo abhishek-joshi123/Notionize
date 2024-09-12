@@ -241,3 +241,39 @@ export const getFileDetails = async (fileId: string) => {
     return { data: [], error: 'Error' };
   }
 };
+
+export const getCollaborators = async (workspaceId: string) => {
+  const response = await db.select().from(collaborators).where(eq(collaborators.workspaceId, workspaceId));
+  if (!response.length) return [];
+  const userInformation: Promise<User | undefined>[] = response.map(async(user) => {
+      const exists = await db.query.users.findFirst({where: (u, { eq }) => eq(u.id, user.userId)});
+      return exists;
+    }
+  );
+  const resolvedUsers = await Promise.all(userInformation);
+  return resolvedUsers.filter(Boolean) as User[];
+};
+
+export const findUser = async (userId: string) => {
+  const response = await db.query.users.findFirst({ where: (u, { eq }) => eq(u.id, userId)});
+  return response;
+};
+
+export const getActiveProductsWithPrice = async () => {
+  try {
+    const res = await db.query.products.findMany({
+      where: (pro, { eq }) => eq(pro.active, true),
+
+      with: {
+        prices: {
+          where: (pri, { eq }) => eq(pri.active, true),
+        },
+      },
+    });
+    if (res.length) return { data: res, error: null };
+    return { data: [], error: null };
+  } catch (error) {
+    console.log(error);
+    return { data: [], error };
+  }
+};

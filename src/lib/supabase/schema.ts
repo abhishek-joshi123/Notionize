@@ -1,5 +1,5 @@
 import { pgTable, uuid, timestamp, text, foreignKey, jsonb, boolean, bigint, integer, pgEnum } from "drizzle-orm/pg-core"
-  import { sql } from "drizzle-orm"
+  import { relations, sql } from "drizzle-orm"
 
 export const pricingPlanInterval = pgEnum("pricing_plan_interval", ['day', 'week', 'month', 'year'])
 export const pricingType = pgEnum("pricing_type", ['one_time', 'recurring'])
@@ -106,3 +106,14 @@ export const collaborators = pgTable('collaborators', {
 	userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
 	id: uuid('id').defaultRandom().primaryKey().notNull(),
   });
+
+  export const productsRelations = relations(products, ({ many }) => ({
+	prices: many(prices),
+  }));
+  
+  export const pricesRelations = relations(prices, ({ one }) => ({
+	product: one(products, {
+	  fields: [prices.productId],
+	  references: [products.id],
+	}),
+  }));

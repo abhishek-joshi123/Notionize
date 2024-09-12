@@ -10,6 +10,8 @@ import { v4 } from 'uuid';
 import { createFolder } from '@/lib/supabase/queries';
 import { Accordion } from '../ui/accordion';
 import Dropdown from './Dropdown';
+import useSupabaseRealtime from '@/lib/hooks/useSupabseRealTime';
+import { SubscriptionModalProvider, useSubscriptionModal } from '@/lib/providers/subscription-modal-provider';
 
 interface FoldersDropdownListProps {
     workspaceFolders: Folder[];
@@ -17,12 +19,12 @@ interface FoldersDropdownListProps {
   }
 
 const FoldersDropdownList:React.FC<FoldersDropdownListProps> = ({workspaceFolders, workspaceId}) => {
-    // useSupabaseRealtime();
-    const { state, dispatch, folderId } = useAppState();
-    // const { open, setOpen } = useSubscriptionModal();
-    const { toast } = useToast();
-    const [folders, setFolders] = useState(workspaceFolders);
-    const { subscription } = useSupabaseUser();
+  const { state, dispatch, folderId } = useAppState();
+  const { open, setOpen } = useSubscriptionModal();
+  const { toast } = useToast();
+  const [folders, setFolders] = useState(workspaceFolders);
+  const { subscription } = useSupabaseUser();
+  useSupabaseRealtime();
 
     useEffect(() => {
         if (workspaceFolders.length > 0) {
@@ -32,10 +34,8 @@ const FoldersDropdownList:React.FC<FoldersDropdownListProps> = ({workspaceFolder
               workspaceId,
               folders: workspaceFolders.map((folder) => ({
                 ...folder,
-                files:
-                  state.workspaces
-                    .find((workspace) => workspace.id === workspaceId)
-                    ?.folders.find((f) => f.id === folder.id)?.files || [],
+                files: state.workspaces.find((workspace) => workspace.id === workspaceId)
+                ?.folders.find((f) => f.id === folder.id)?.files || [],
               })),
             },
           });
@@ -46,16 +46,16 @@ const FoldersDropdownList:React.FC<FoldersDropdownListProps> = ({workspaceFolder
 
     useEffect(() => {
         setFolders(
-        state.workspaces.find((workspace) => workspace.id === workspaceId)
-            ?.folders || []
+        state.workspaces.find((workspace) => workspace.id === workspaceId)?.folders || []
         );
     }, [state]);
 
     // add folders
     const addFolderHandler = async() => {
-      // if(folders.length >= 3 && !subscription) {
-
-      // }
+      if(folders.length >= 3 && !subscription) {
+        setOpen(true)
+        return
+      }
       const newFolder: Folder = {
         data: null,
         id: v4(),
