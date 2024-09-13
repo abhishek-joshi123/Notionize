@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from '../ui/button';
 import { formatPrice, postData } from '@/lib/utils';
 import Loader from './Loader';
+import { getStripe } from '@/lib/stripe/stripeClient';
 
 interface SubscriptionModalProps {
     products: ProductWirhPrice[];
