@@ -1,9 +1,10 @@
 {
-  "name": "cypress",
+  "name": "notionize",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "fast": "next dev --turbo",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

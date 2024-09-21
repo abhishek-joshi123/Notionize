@@ -1,4 +1,6 @@
+
 'use client';
+
 import { createContext, useContext, useEffect, useState } from 'react';
 import { io as ClientIO } from 'socket.io-client';
 
@@ -27,7 +29,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         addTrailingSlash: false,
       }
     );
-
+    
     socketInstance.on('connect', () => {
       setIsConnected(true)
     });
@@ -43,7 +45,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   
   return (
     <SocketContext.Provider value={{ socket, isConnected }}>
-
       {children}
     </SocketContext.Provider>
   );

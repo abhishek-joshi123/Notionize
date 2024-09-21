@@ -222,6 +222,24 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ dirDetails, dirType, fileId }
     fetchInformation();
   }, [fileId, workspaceId, quill, dirType]);
 
+  
+  useEffect(() => {
+    if (socket === null || quill === null || !fileId) return;
+    socket.emit('create-room', fileId);
+  }, [socket, quill, fileId]);
+
+  useEffect(() => {
+    if (quill === null || socket === null) return;
+    // console.log("quill ==> ", quill);
+    const socketHandler = (deltas: any, id: string) => {
+      if (id === fileId) quill.updateContents(deltas);
+    };
+    socket.on('receive-changes', socketHandler);
+    return () => {
+      socket.off('receive-changes', socketHandler);
+    };
+  }, [quill, socket, fileId]);
+
   useEffect(() => {
     if (quill === null || socket === null || !fileId || !localCursors.length)
       return;
@@ -231,16 +249,11 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ dirDetails, dirType, fileId }
         if (cursorToMove) cursorToMove.moveCursor(cursorId, range);
       }
     };
-    socket.on('receive-cursor-move', socketHandler);
+    socket.on('receive-cursor-move', socketHandler);    
     return () => {
       socket.off('receive-cursor-move', socketHandler);
     };
   }, [quill, socket, fileId, localCursors]);
-
-  useEffect(() => {
-    if (socket === null || quill === null || !fileId) return;
-    socket.emit('create-room', fileId);
-  }, [socket, quill, fileId]);
 
   //Send quill changes to all clients
   useEffect(() => {
@@ -291,17 +304,6 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ dirDetails, dirType, fileId }
     };
   }, [quill, socket, fileId, user, details, folderId, workspaceId, dispatch]);
 
-  useEffect(() => {
-    if (quill === null || socket === null) return;
-    const socketHandler = (deltas: any, id: string) => {
-      if (id === fileId) quill.updateContents(deltas);
-    };
-    socket.on('receive-changes', socketHandler);
-    return () => {
-      socket.off('receive-changes', socketHandler);
-    };
-  }, [quill, socket, fileId]);
-
   
   useEffect(() => {
     if (!fileId || quill === null) return;
@@ -309,6 +311,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ dirDetails, dirType, fileId }
     const subscription = room.on('presence', { event: 'sync' }, () => {
         const newState = room.presenceState();
         const newCollaborators = Object.values(newState).flat() as any;
+        // console.log("newCollaborators ==> ", newCollaborators);
         setCollaborators(newCollaborators);
         if (user) {
           const allCursors: any = [];
@@ -320,6 +323,7 @@ const QuillEditor: React.FC<QuillEditorProps> = ({ dirDetails, dirType, fileId }
               }
             }
           );
+          // console.log("allCursors ==> ", allCursors);
           setLocalCursors(allCursors);
         }
       }).subscribe(async (status) => {
